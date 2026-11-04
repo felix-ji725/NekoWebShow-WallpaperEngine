@@ -41,7 +41,7 @@
 
 双击 **`获取素材并安装.bat`**：
 
-1. 从上游仓库下载素材包（约 1 GB，BITS 断点续传，内置镜像备用）
+1. 从上游仓库（[Chocola-X/NekoWebShow](https://github.com/Chocola-X/NekoWebShow)）下载素材包（约 1 GB，BITS 断点续传，内置镜像备用）
 2. 自动解出 `data/`、`background/`、`sounds/` 放到项目里
 3. 校验数量（195 / 121 / 271）
 4. 调起安装脚本
@@ -61,7 +61,9 @@
 
 `data/`、`background/`、`sounds/` **不随本仓库分发**。
 
-这些是《猫娘乐园》的游戏素材，版权归 **NEKO WORKs**，不属于上游作者，也不属于本项目。请自行准备（见上一节），仅限个人自用，**请勿再分发**。
+这些是《猫娘乐园》的游戏素材，版权归 **NEKO WORKs**，不属于上游作者，也不属于本项目。请自行准备，仅限个人自用，**请勿再分发**。
+
+获取方式：打开上游仓库 <https://github.com/Chocola-X/NekoWebShow> → `Code` → `Download ZIP`，解压后取其中 `data/`、`background/`、`sounds/` 三个目录。
 
 校验清单：
 
