@@ -17,14 +17,13 @@
 >
 > **本项目（修改版）源码：<https://github.com/felix-ji725/NekoWebShow-WallpaperEngine>**
 
-<!-- 效果截图：截好后放到 docs/ 下，取消下面注释 -->
-<!--
 ## 效果
 
 <p align="center">
-  <img src="./docs/preview-duo.png" width="720" alt="双人模式" />
+  <img src="./docs/preview-duo.webp" width="760" alt="双人模式：两个角色同屏" />
+  <br />
+  <img src="./docs/preview-panel.png" width="260" alt="控制面板：角色、双人模式、设置、语言" />
 </p>
--->
 
 ## 功能
 
@@ -98,11 +97,6 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 | localStorage 持久化 | `file://` 下 cookie 不可用 |
 | 安装脚本 | 目录联接 / 复制双模式，注册表兜底查 Steam 路径 |
 
-## 许可证
-
-[GNU AGPL-3.0](LICENSE)，与上游一致。
-
-分发打包好的壁纸（含本项目代码）时，你需要：附上本仓库地址、保留 `LICENSE`、保留上游署名与链接、不加额外限制。
 
 ## 致谢
 
@@ -111,4 +105,4 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 - [fflate](https://github.com/101arrowz/fflate) — 解压，MIT
 - 《猫娘乐园》素材版权归 **NEKO WORKs**
 
-本项目与 NEKO WORKs、Wallpaper Engine 开发商均无关联。
+本项目以 [GNU AGPL-3.0](LICENSE) 发布。与 NEKO WORKs、Wallpaper Engine 开发商均无关联。
