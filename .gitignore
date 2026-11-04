@@ -1,0 +1,8 @@
+data/
+background/
+sounds/
+*.zip
+*.rar
+*.7z
+log.txt
+_install.log
