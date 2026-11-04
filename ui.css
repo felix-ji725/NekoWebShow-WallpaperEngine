@@ -1,0 +1,591 @@
+/* ============================================================
+   NekoWebShow 控制 UI 样式（PHP 版与静态版共用）
+   - 左侧边栏 · 每个角色一个抽屉（手风琴式展开/收起）
+   - 二次元风格：白色半透明底 · 咖啡色文字 · 粉色描边 · 无阴影
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "微软雅黑", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: white;
+  background: #f8eee6;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#background-layers {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.background-layer {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+}
+
+.background-section { font-weight: bold; cursor: default; }
+.background-schedule { padding: 0 16px 8px 30px; font-size: 12px; color: #806858; line-height: 1.5; }
+
+#canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  transform: none;
+  z-index: 1;
+}
+
+/* ---------------- 侧边栏容器 ---------------- */
+#topbar {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  width: 268px;   /* 264 + 4，补偿加宽后的滚动条，内容区不变窄 */
+  max-height: calc(100vh - 96px);   /* 上面 8px + 底部给任务栏留 88px */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.78);
+  border: 2px solid #f2a0c0;
+  border-radius: 18px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transform: translateX(-120%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.42s ease-in-out,
+              opacity 0.32s ease,
+              visibility 0s 0.42s;
+  z-index: 999;
+  scrollbar-width: none;
+  scrollbar-color: #f2a0c0 transparent;
+}
+
+#topbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* 自绘滚动条：壁纸里原生滚动条拖不动，用 pointer 事件自己做 */
+.neko-scroll-thumb {
+  position: fixed;
+  width: 9.6px;              /* 原 6px 的 1.6 倍，更好抓 */
+  border-radius: 5px;
+  background: rgba(242, 160, 192, 0.9);
+  z-index: 10000;
+  cursor: grab;
+  touch-action: none;
+  display: none;
+}
+.neko-scroll-thumb:active {
+  cursor: grabbing;
+  background: #e87ba6;
+}
+.neko-scroll-thumb::before {
+  content: "";
+  position: absolute;
+  inset: -6px -6px;
+}
+
+#topbar.open {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease,
+              visibility 0s 0s;
+}
+
+/* 被拖动后：取消滑入动画，只保留淡入淡出 */
+#topbar.free,
+#topbar.free.open {
+  transform: translateX(0);
+  transition: opacity 0.28s ease, visibility 0s 0s;
+}
+#topbar.dragging {
+  transition: none !important;
+}
+
+/* ---------------- 标题 ---------------- */
+#topbar > .label {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 10px 16px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #6f4e37;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(242, 160, 192, 0.55);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 标题栏常驻，滚动按钮跟着一起钉在顶部 */
+.panel-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.panel-nav button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 9px;
+  border: 1px solid #f2a0c0;
+  background: #fff;
+  color: #6f4e37;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.panel-nav button:hover {
+  background: #ffe2ed;
+}
+
+.panel-nav button:active {
+  transform: scale(0.94);
+}
+
+#topbar > .label:active {
+  cursor: grabbing;
+}
+
+/* ---------------- 角色分组：打开设置时收起 ---------------- */
+#char-group {
+  flex: 0 0 auto;
+}
+
+#char-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #6f4e37;
+  background: rgba(242, 160, 192, 0.12);
+  border-bottom: 1px solid rgba(242, 160, 192, 0.55);
+  cursor: pointer;
+  user-select: none;
+}
+
+#char-group-head:hover {
+  background: rgba(242, 160, 192, 0.28);
+}
+
+#char-group-head .char-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: normal;
+  color: #b98aa0;
+}
+
+#char-group.collapsed .menu-item {
+  display: none;
+}
+
+/* ---------------- 双人模式：角色一 / 角色二 选择圈 ---------------- */
+#char-group.collapsed #duo-slots {
+  display: none;
+}
+
+#duo-slots {
+  display: flex;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(242, 160, 192, 0.55);
+}
+
+.duo-slot {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #f2a0c0;
+  background: #fff;
+  color: #b08a9a;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.duo-slot:hover {
+  background: #ffe2ed;
+}
+
+.duo-slot.active {
+  background: #f2a0c0;
+  border-color: #e87ba6;
+  color: #fff;
+}
+
+.duo-slot:active {
+  transform: scale(0.92);
+}
+
+/* ---------------- 抽屉项 ---------------- */
+.menu-item {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(242, 160, 192, 0.55);
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-item > .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: #6f4e37;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menu-item > .label:hover {
+  background: rgba(242, 160, 192, 0.3);
+  color: #4e3426;
+}
+
+/* 右侧箭头（CSS 生成，不依赖 HTML 里的▾文字） */
+.menu-item > .label::after {
+  content: "▾";
+  margin-left: auto;
+  font-size: 12px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu-item.open > .label {
+  background: rgba(242, 160, 192, 0.22);
+  color: #4e3426;
+}
+
+.menu-item.open > .label::after {
+  transform: rotate(180deg);
+}
+
+/* 菜单链接禁止拖拽：拖到桌面会生成 .url 快捷方式 */
+#topbar a[data-model] {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+/* ---------------- 抽屉内容体 ---------------- */
+.dropdown {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.32s ease-in-out,
+              opacity 0.3s ease;
+}
+
+.menu-item.open > .dropdown {
+  opacity: 1;
+  transition: max-height 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.26s ease;
+}
+
+/* 壁纸列表双列，行数砍半，免得设置抽屉高过屏幕。
+   选择器要带 .dropdown 前缀，否则会被文件后面同优先级的 .dropdown .opt 覆盖。 */
+.bg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.dropdown .bg-grid > .opt {
+  /* 左右内边距压到 4px、圆点缩小、间距 4px，把省下的宽度全给文字 */
+  padding: 7px 4px;
+  font-size: 12.5px;
+  gap: 4px;
+  min-width: 0;
+}
+.dropdown .bg-grid .dot {
+  width: 10px;
+  height: 10px;
+  border-width: 1.5px;
+}
+.bg-grid > .background-section,
+.bg-grid > .background-schedule {
+  grid-column: 1 / -1;
+}
+.dropdown .bg-grid > .opt[data-wallpaper] > span:last-child {
+  min-width: 0;
+  flex: 1 1 auto;   /* 占满圆点之外的剩余宽度，别只按内容宽度排版 */
+}
+
+/* 滚轮不一定被壁纸转发，给一对点击式滚动按钮 */
+.settings-scroll {
+  justify-content: center;
+  font-weight: bold;
+  color: #c2527f;
+  background: rgba(242, 160, 192, 0.14);
+  border-top: 1px solid rgba(242, 160, 192, 0.45);
+}
+
+.dropdown a {
+  display: block;
+  padding: 9px 16px 9px 30px;
+  text-decoration: none;
+  color: #6f4e37;
+  font-size: 14px;
+  transition: background 0.18s ease, color 0.18s ease, padding-left 0.18s ease;
+}
+
+.dropdown a:hover {
+  background: rgba(242, 160, 192, 0.3);
+  color: #4e3426;
+  padding-left: 36px;
+}
+
+/* 设置类抽屉内的选项行 */
+.dropdown .opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 30px;
+  font-size: 14px;
+  color: #6f4e37;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.dropdown .opt:hover {
+  background: rgba(242, 160, 192, 0.3);
+  color: #4e3426;
+}
+.dropdown .opt .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #f2a0c0;
+  flex: 0 0 auto;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.dropdown .opt.selected .dot {
+  background: #f2a0c0;
+  border-color: #f2a0c0;
+}
+.dropdown .opt.selected {
+  color: #4e3426;
+  font-weight: bold;
+}
+.dropdown .opt .fps-live {
+  margin-left: auto;
+  font-size: 11px;
+  color: #b98aa0;
+  font-variant-numeric: tabular-nums;
+  min-width: 52px;
+  text-align: right;
+}
+
+.dropdown .opt .fps-badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: rgba(242, 160, 192, 0.25);
+  color: #6f4e37;
+  margin-left: auto;
+}
+
+/* ---------------- 信息行（底部） ---------------- */
+.infotext {
+  flex: 0 0 auto;
+  font-size: 12px;
+  text-align: center;
+  color: #6f4e37;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(242, 160, 192, 0.55);
+}
+.infotext a {
+  color: inherit;
+  text-decoration: none;
+}
+.infotext a:hover {
+  color: #4e3426;
+  text-decoration: underline;
+}
+
+/* ---------------- 切换图标（可拖动，无阴影） ---------------- */
+#toggle-icon {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  height: 44px;
+  width: 44px;
+  cursor: grab;
+  z-index: 1000;
+  border-radius: 14px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#toggle-icon:hover {
+  transform: scale(1.08);
+}
+#toggle-icon:active,
+#toggle-icon.dragging {
+  cursor: grabbing;
+  transform: scale(0.96);
+}
+
+/* ---------------- Loading 框 ---------------- */
+#loading {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 120px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: opacity 1s ease-in-out;
+  font-size: 18px;
+  color: #6f4e37;
+  text-align: center;
+}
+
+/* ---------------- 窄屏适配 ---------------- */
+@media (max-width: 480px) {
+  #topbar {
+    width: min(268px, calc(100vw - 16px));
+  }
+  .menu-item > .label {
+    font-size: 14px;
+    padding: 11px 14px;
+  }
+  .dropdown a {
+    padding: 9px 14px 9px 26px;
+    font-size: 13px;
+  }
+  #toggle-icon {
+    height: 38px;
+    width: 38px;
+  }
+}
+
+
+/* ---------------- 设置项：开关（锁定人物 / 关闭声音） ---------------- */
+.dropdown .opt .switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(111, 78, 55, 0.22);
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: auto;
+  transition: background 0.2s ease;
+}
+.dropdown .opt .switch .knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left 0.2s ease;
+}
+.dropdown .opt.on .switch {
+  background: #f2a0c0;
+}
+.dropdown .opt.on .switch .knob {
+  left: 20px;
+}
+
+/* ---------------- 壁纸选项：文件名过长时省略 ---------------- */
+.dropdown .opt[data-wallpaper] {
+  gap: 8px;
+}
+.dropdown .opt[data-wallpaper] > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------- 设置里“重设角色位置”动作按钮 ---------------- */
+.dropdown .opt.reset-opt {
+  font-weight: bold;
+  color: #c2527f;
+  border-top: 1px solid rgba(242, 160, 192, 0.45);
+  margin-top: 4px;
+}
+
+/* ---------------- 设置里“角色大小” ---------------- */
+.scale-opt {
+  gap: 6px;
+}
+.scale-opt .scale-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #f2a0c0;
+  background: #fff;
+  color: #6f4e37;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.scale-opt .scale-btn:hover {
+  background: #ffe2ed;
+}
+.scale-opt .scale-btn:active {
+  transform: scale(0.94);
+}
+.scale-opt .scale-val {
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- 人物未锁定时，画布显示可拖动手型 ---------------- */
+body.char-unlocked #canvas {
+  cursor: grab;
+}
+body.char-unlocked #canvas:active {
+  cursor: grabbing;
+}
+
+
+/* 角色二选中的皮肤：和角色一的粉色高亮并存，用蓝色左边条区分 */
+/* 角色二选中的皮肤：和角色一完全同一套样式，只把粉色换成蓝色 */
+#topbar .dropdown a.duo-current {
+  background: #e3f0ff;
+  font-weight: bold;
+}
+
+/* 两个角色选中同一套皮肤时：左粉右蓝，一眼看出是共用 */
+#topbar .dropdown a[aria-current="true"].duo-current {
+  background: linear-gradient(90deg, #ffe2ed 0%, #ffe2ed 50%, #e3f0ff 50%, #e3f0ff 100%);
+}
+.dropdown a[aria-current="true"] {
+  background: #ffe2ed;
+  font-weight: bold;
+}
+#character-status { color: #9b364e; font-size: 13px; }

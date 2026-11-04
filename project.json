@@ -1,0 +1,13 @@
+{
+  "description": "NekoWebShow - NEKOPARA E-mote dynamic wallpaper (web)",
+  "file": "index.html",
+  "general": {
+    "properties": {},
+    "supportsaudioprocessing": true
+  },
+  "preview": "preview.png",
+  "tags": ["Anime"],
+  "title": "NekoWebShow",
+  "type": "web",
+  "version": 1
+}
