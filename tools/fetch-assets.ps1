@@ -46,9 +46,27 @@ function Get-Zip($dest) {
         try {
             if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) {
                 $job = Start-BitsTransfer -Source $u -Destination $dest -Asynchronous -Priority Foreground
+                $t0 = Get-Date
+                $lastBytes = 0
+                $lastT = $t0
                 while ($job.JobState -in 'Connecting', 'Transferring', 'Queued') {
-                    $pct = if ($job.BytesTotal -gt 0) { [Math]::Round($job.BytesTransferred / $job.BytesTotal * 100) } else { 0 }
-                    Write-Progress -Activity "下载素材包" -Status ("{0} MB / {1} MB" -f [Math]::Round($job.BytesTransferred / 1MB), [Math]::Round($job.BytesTotal / 1MB)) -PercentComplete $pct
+                    $mb = [Math]::Round($job.BytesTransferred / 1MB, 1)
+                    $now = Get-Date
+                    $dt = ($now - $lastT).TotalSeconds
+                    $speed = 0
+                    if ($dt -gt 0.4) {
+                        $speed = ($job.BytesTransferred - $lastBytes) / 1KB / $dt
+                        $lastBytes = $job.BytesTransferred
+                        $lastT = $now
+                    }
+                    if ($job.BytesTotal -gt 0) {
+                        $pct = [Math]::Round($job.BytesTransferred / $job.BytesTotal * 100)
+                        $total = [Math]::Round($job.BytesTotal / 1MB, 0)
+                        Write-Progress -Activity "下载素材包（约 1 GB）" -Status ("{0} MB / {1} MB    {2} KB/s" -f $mb, $total, [Math]::Round($speed)) -PercentComplete $pct
+                    } else {
+                        # 分块传输没有 Content-Length，只能显示已下载量与速度
+                        Write-Progress -Activity "下载素材包（约 1 GB，总大小未知）" -Status ("已下载 {0} MB    {1} KB/s    用时 {2:mm\:ss}" -f $mb, [Math]::Round($speed), ($now - $t0))
+                    }
                     Start-Sleep -Milliseconds 800
                     $job = Get-BitsTransfer -JobId $job.JobId
                 }
@@ -94,19 +112,21 @@ function Get-Files {
     Write-Host "  待下载 $($todo.Count) 个文件（共 $([Math]::Round(($todo | Measure-Object s -Sum).Sum / 1MB)) MB）"
     if ($todo.Count -eq 0) { return }
 
+    $totalMB = [Math]::Round(($todo | Measure-Object s -Sum).Sum / 1MB)
     $i = 0
+    $doneMB = 0
     foreach ($f in $todo) {
         $i++
         $dest = Join-Path $root $f.p
         New-Item -ItemType Directory -Path (Split-Path -Parent $dest) -Force | Out-Null
         $url = "https://ghfast.top/https://raw.githubusercontent.com/$($manifest.repo)/$($manifest.branch)/$($f.p)"
         $url2 = "https://raw.githubusercontent.com/$($manifest.repo)/$($manifest.branch)/$($f.p)"
-        Write-Progress -Activity "下载素材" -Status "$i / $($todo.Count)  $($f.p)" -PercentComplete ([Math]::Round($i / $todo.Count * 100))
+        Write-Progress -Activity "下载素材（逐文件，可中断续传）" -Status ("已下载 {0} / {1} MB    第 {2} / {3} 个    {4}" -f [Math]::Round($doneMB), $totalMB, $i, $todo.Count, (Split-Path -Leaf $f.p)) -PercentComplete ([Math]::Round($i / $todo.Count * 100))
         $done = $false
         foreach ($u in @($url, $url2)) {
             try {
                 Invoke-WebRequest -Uri $u -OutFile $dest -UseBasicParsing -TimeoutSec 120
-                if ((Get-Item $dest).Length -eq $f.s) { $done = $true; break }
+                if ((Get-Item $dest).Length -eq $f.s) { $done = $true; $doneMB += $f.s / 1MB; break }
             } catch { }
         }
         if (-not $done) { Write-Host "  跳过（失败）: $($f.p)" -ForegroundColor DarkYellow }
