@@ -21,7 +21,7 @@ const translations = {
         'pageTitle': 'NEKOPARA Character E-mote Gallery',
         'loading': 'Loading...',
         'characterLoadError': 'Unable to load character. Please retry.',
-        'by': 'By:',
+        'by': 'Player by:',
         'githubProject': 'Github Project:',
         
         // 角色名称
@@ -99,7 +99,7 @@ const translations = {
         'pageTitle': '猫娘乐园角色E-mote图鉴',
         'loading': '加载中...',
         'characterLoadError': '角色加载失败，请重试。',
-        'by': '作者：',
+        'by': '播放器作者：',
         'githubProject': 'Github项目：',
         
         // 角色名称
@@ -177,7 +177,7 @@ const translations = {
         'pageTitle': '貓娘樂園角色E-mote圖鑑',
         'loading': '載入中...',
         'characterLoadError': '角色載入失敗，請重新載入。',
-        'by': '作者：',
+        'by': '播放器作者：',
         'githubProject': 'Github專案：',
         
         // 角色名称
@@ -255,7 +255,7 @@ const translations = {
         'pageTitle': 'ネコぱらキャラクターE-mote図鑑',
         'loading': '読み込み中...',
         'characterLoadError': '読み込みに失敗しました。再読み込みしてください。',
-        'by': '作者：',
+        'by': 'プレイヤー作者：',
         'githubProject': 'Githubプロジェクト：',
         
         // 角色名称

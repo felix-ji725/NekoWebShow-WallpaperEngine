@@ -67,7 +67,7 @@
 
 `data/`、`background/`、`sounds/` **不随本仓库分发**。
 
-这些是《猫娘乐园》的游戏素材，版权归 **NEKO WORKs**，不属于上游作者，也不属于本项目。请自行准备，仅限个人自用，**请勿再分发**。
+这些是《猫娘乐园》的游戏素材，版权归 **NEKO WORKs**，不属于上游作者，也不属于本项目。其中部分素材的解包与整理来自 **Ulysses**（[FreeMote](https://github.com/UlyssesWu/FreeMote) 工具链、《猫娘动态壁纸 青春版》）。请自行准备，仅限个人自用，**请勿再分发**。
 
 获取方式：打开上游仓库 <https://github.com/Chocola-X/NekoWebShow> → `Code` → `Download ZIP`，解压后取其中 `data/`、`background/`、`sounds/` 三个目录。
 
@@ -108,9 +108,21 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 
 ## 致谢
 
-- [NekoWebShow](https://github.com/Chocola-X/NekoWebShow) — 上游播放器，AGPL-3.0
-- [FreeMote](https://github.com/UlyssesWu/FreeMote) 与 [FreeMote-SDK](https://github.com/Project-AZUSA/FreeMote-SDK) — E-mote 解包与 WebGL 驱动
-- [fflate](https://github.com/101arrowz/fflate) — 解压，MIT
-- 《猫娘乐园》素材版权归 **NEKO WORKs**
+**Ulysses**（[UlyssesWu](https://github.com/UlyssesWu)）
 
-本项目以 [GNU AGPL-3.0](LICENSE) 发布。与 NEKO WORKs、Wallpaper Engine 开发商均无关联。
+- [FreeMote](https://github.com/UlyssesWu/FreeMote) 工具链 —— E-mote 解包与转换
+- [FreeMote SDK](https://github.com/Project-AZUSA/FreeMote-SDK) v3.9 —— 本项目使用的 WebGL 渲染驱动（`driver/FreeMoteDriver.js`）
+- 角色素材的首次解包与整理
+- Wallpaper Engine 作品《[猫娘动态壁纸 青春版](https://steamcommunity.com/sharedfiles/filedetails/?id=3752916624)》
+
+**GTX690战术核显卡导弹**
+
+- [NekoWebShow](https://github.com/Chocola-X/NekoWebShow) —— 网页版播放器，本项目的上游（AGPL-3.0）
+- 在 Ulysses 解包基础上补充背景与新增立绘
+
+**其它**
+
+- [fflate](https://github.com/101arrowz/fflate) —— 解压，MIT
+- 《猫娘乐园》素材原始版权归 **NEKO WORKs**
+
+本项目代码以 [GNU AGPL-3.0](LICENSE) 发布。其中 `driver/FreeMoteDriver.js` 为 **CC BY-NC-SA 4.0**（禁止商业使用），因此**本项目整体仅限非商业用途**。与 NEKO WORKs、Wallpaper Engine 开发商均无关联。
