@@ -118,7 +118,7 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 **GTX690战术核显卡导弹**
 
 - [NekoWebShow](https://github.com/Chocola-X/NekoWebShow) —— 网页版播放器，本项目的上游（AGPL-3.0）
-- 在 Ulysses 解包基础上补充背景与新增立绘
+- 后续素材解包：动态立绘与背景图，来自《猫娘乐园》Vol 4 / After
 
 **其它**
 
