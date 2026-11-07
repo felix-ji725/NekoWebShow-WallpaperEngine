@@ -16,7 +16,7 @@
 | 贡献 | 说明 | 许可 |
 | --- | --- | --- |
 | NekoWebShow | 网页版《猫娘乐园》E-mote 图鉴播放器，本项目的代码上游 | AGPL-3.0 |
-| 素材聚合 | 在 Ulysses 解包的基础上补充背景与新增立绘 | — |
+| 后续素材解包 | 动态立绘与背景图，解包自《猫娘乐园》Vol 4 / After | — |
 
 ### felix-ji725
 
@@ -44,7 +44,7 @@
 | 原始素材 | © NEKO WORKs |
 | 解包与首次整理 | Ulysses |
 | 《猫娘动态壁纸 青春版》（Wallpaper Engine） | Ulysses |
-| 素材聚合与播放器 NekoWebShow | GTX690战术核显卡导弹 |
+| 动态立绘与背景图解包、播放器 NekoWebShow | GTX690战术核显卡导弹 |
 | Windows / Wallpaper Engine 适配（本项目） | felix-ji725 |
 
 **说明**：本项目所引用的素材，其解包与整理工作源自 Ulysses；此前仅致谢了 NekoWebShow 作者，未注明 Ulysses 的贡献，现已更正。素材不全由同一来源，其余部分由上游作者后续补充，具体范围本项目无法核实。
