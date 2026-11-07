@@ -108,7 +108,7 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 
 ## 致谢
 
-**Ulysses**（[UlyssesWu](https://github.com/UlyssesWu)）
+**Ulysses Wu**（[UlyssesWu](https://github.com/UlyssesWu)）
 
 - [FreeMote](https://github.com/UlyssesWu/FreeMote) 工具链 —— E-mote 解包与转换
 - [FreeMote SDK](https://github.com/Project-AZUSA/FreeMote-SDK) v3.9 —— 本项目使用的 WebGL 渲染驱动（`driver/FreeMoteDriver.js`）
@@ -125,4 +125,4 @@ WE 不把 `wheel` 事件转发给 web 壁纸。用右侧粉色滚动条，或标
 - [fflate](https://github.com/101arrowz/fflate) —— 解压，MIT
 - 《猫娘乐园》素材原始版权归 **NEKO WORKs**
 
-本项目代码以 [GNU AGPL-3.0](LICENSE) 发布。其中 `driver/FreeMoteDriver.js` 为 **CC BY-NC-SA 4.0**（禁止商业使用），因此**本项目整体仅限非商业用途**。与 NEKO WORKs、Wallpaper Engine 开发商均无关联。
+本项目代码以 [GNU AGPL-3.0](LICENSE) 发布。其中 `driver/FreeMoteDriver.js` 为 FreeMote SDK 的编译产物，按上游要求随仓库附带许可证全文：[LICENSES/FreeMote.LICENSE.txt](LICENSES/FreeMote.LICENSE.txt)（CC BY-NC-SA 4.0，作者 Ulysses Wu）。其中 `driver/FreeMoteDriver.js` 为 **CC BY-NC-SA 4.0**（禁止商业使用），因此**本项目整体仅限非商业用途**。与 NEKO WORKs、Wallpaper Engine 开发商均无关联。

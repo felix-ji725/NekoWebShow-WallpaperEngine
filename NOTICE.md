@@ -2,12 +2,12 @@
 
 ## 按贡献者列出
 
-### Ulysses（UlyssesWu / Ulysses-U大）
+### Ulysses Wu（GitHub: [UlyssesWu](https://github.com/UlyssesWu)，B 站：Ulysses-U大）
 
 | 贡献 | 说明 | 许可 |
 | --- | --- | --- |
-| FreeMote 工具链 | E-mote 模型解包与转换工具 | CC BY-NC-SA 4.0 |
-| FreeMote SDK v3.9（`driver/FreeMoteDriver.js`） | 本项目使用的 WebGL / asm.js 渲染驱动，文件头部即为其版权声明 | CC BY-NC-SA 4.0 |
+| [FreeMote](https://github.com/UlyssesWu/FreeMote) 工具链 | E-mote 模型解包与转换（`wdwxy12345@gmail.com`） | CC BY-NC-SA 4.0 |
+| [FreeMote SDK](https://github.com/Project-AZUSA/FreeMote-SDK) v3.9 | 本项目使用的 WebGL / asm.js 渲染驱动，即 `driver/FreeMoteDriver.js` | CC BY-NC-SA 4.0 |
 | 原始素材解包与整理 | 角色模型的首次解包 | — |
 | 《[猫娘动态壁纸 青春版](https://steamcommunity.com/sharedfiles/filedetails/?id=3752916624)》 | Wallpaper Engine 网页壁纸作品，本项目的素材链起点 | — |
 
@@ -33,9 +33,23 @@
 | 组件 | 作者 | 许可证 | 来源 |
 | --- | --- | --- | --- |
 | NekoWebShow（本项目上游） | GTX690战术核显卡导弹 | AGPL-3.0 | https://github.com/Chocola-X/NekoWebShow |
-| FreeMote SDK（`driver/FreeMoteDriver.js`） | **Ulysses** | CC BY-NC-SA 4.0 | https://github.com/Project-AZUSA/FreeMote-SDK |
-| FreeMote 工具链 | **Ulysses** | CC BY-NC-SA 4.0 | https://github.com/UlyssesWu/FreeMote |
+| FreeMote SDK（`driver/FreeMoteDriver.js`） | **Ulysses Wu** | CC BY-NC-SA 4.0 | https://github.com/Project-AZUSA/FreeMote-SDK |
+| FreeMote 工具链 | **Ulysses Wu** | CC BY-NC-SA 4.0 | https://github.com/UlyssesWu/FreeMote |
 | fflate（`fflate.js`） | Arjun Barrett | MIT | https://github.com/101arrowz/fflate |
+
+## FreeMote 许可要求
+
+上游 [FreeMote](https://github.com/UlyssesWu/FreeMote) 明确要求：
+
+> It's required to attach the text of FreeMote.LICENSE with your release if you're using FreeMote codes or binaries.
+
+本项目打包了 FreeMote SDK 的编译产物 `driver/FreeMoteDriver.js`，因此**随仓库附带许可证全文**：
+
+- [LICENSES/FreeMote.LICENSE.txt](LICENSES/FreeMote.LICENSE.txt)
+
+FreeMote 采用 **CC BY-NC-SA 4.0**，作者 **Ulysses Wu**（wdwxy12345@gmail.com）。
+
+此外，FreeMote 说明其部分输出物（如转换后的模型文件）同样被视为 *Adapted Material*，需遵循 CC BY-NC-SA 4.0。本项目**不分发**任何素材文件；用户自行获取的素材，其原始版权仍归 NEKO WORKs，使用时请注意上述署名与非商业要求。
 
 ## 素材来源链
 
