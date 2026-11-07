@@ -3,7 +3,8 @@
 #
 # 用法：
 #   powershell -ExecutionPolicy Bypass -File tools\fetch-assets.ps1
-#   powershell -ExecutionPolicy Bypass -File tools\fetch-assets.ps1 -Mode files   # 强制逐文件下载
+#   powershell -ExecutionPolicy Bypass -File tools\fetch-assets.ps1 -Mode files   # 强制逐文件
+#   powershell -ExecutionPolicy Bypass -File tools\fetch-assets.ps1 -Mode zip     # 强制整包
 #   powershell -ExecutionPolicy Bypass -File tools\fetch-assets.ps1 -SkipInstall  # 只下素材
 
 param(
@@ -20,20 +21,54 @@ $root = Split-Path -Parent $PSScriptRoot
 $branch = 'html_version_v2'
 $repo = 'Chocola-X/NekoWebShow'
 $dirs = @('data', 'background', 'sounds')
-$expected = @{ 'data' = 195; 'background' = 121; 'sounds' = 271 }
 
 function Write-Step($t) { Write-Host "`n== $t ==" -ForegroundColor Cyan }
 
-function Test-Assets {
-    $ok = $true
-    foreach ($d in $dirs) {
-        $path = Join-Path $root $d
-        $n = if (Test-Path $path) { (Get-ChildItem $path -Recurse -File | Measure-Object).Count } else { 0 }
-        $color = if ($n -eq $expected[$d]) { 'Green' } else { 'Yellow' }
-        Write-Host ("  {0,-12} {1,4} / {2}" -f $d, $n, $expected[$d]) -ForegroundColor $color
-        if ($n -ne $expected[$d]) { $ok = $false }
+# ---------- 清单：以文件为准，不看数量 ----------
+$manifest = Get-Content (Join-Path $PSScriptRoot 'assets-manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$allFiles = $manifest.files
+
+# 逐个文件核对：存在且大小一致才算就绪
+function Get-AssetState {
+    $missing = New-Object System.Collections.ArrayList
+    $present = 0
+    $missingBytes = 0
+    foreach ($f in $allFiles) {
+        $dest = Join-Path $root $f.p
+        if ((Test-Path $dest) -and ((Get-Item $dest).Length -eq $f.s)) {
+            $present++
+        } else {
+            [void]$missing.Add($f)
+            $missingBytes += $f.s
+        }
     }
-    return $ok
+    $extra = 0
+    foreach ($d in $dirs) {
+        $p = Join-Path $root $d
+        if (Test-Path $p) {
+            $have = (Get-ChildItem $p -Recurse -File | Measure-Object).Count
+            $want = ($allFiles | Where-Object { $_.p -like "$d/*" }).Count
+            if ($have -gt $want) { $extra += $have - $want }
+        }
+    }
+    return [pscustomobject]@{
+        Missing      = $missing
+        Present      = $present
+        Total        = $allFiles.Count
+        MissingBytes = $missingBytes
+        Extra        = $extra
+    }
+}
+
+function Show-State($st) {
+    $pct = if ($st.Total -gt 0) { [Math]::Round($st.Present / $st.Total * 100) } else { 0 }
+    Write-Host ("  已就绪 {0} / {1} 个文件（{2}%）" -f $st.Present, $st.Total, $pct) -ForegroundColor $(if ($st.Missing.Count -eq 0) { 'Green' } else { 'Yellow' })
+    if ($st.Missing.Count -gt 0) {
+        Write-Host ("  待补 {0} 个，约 {1} MB" -f $st.Missing.Count, [Math]::Round($st.MissingBytes / 1MB)) -ForegroundColor Yellow
+    }
+    if ($st.Extra -gt 0) {
+        Write-Host ("  另有 {0} 个清单之外的文件（忽略，不影响运行）" -f $st.Extra) -ForegroundColor DarkGray
+    }
 }
 
 function Get-Zip($dest) {
@@ -64,7 +99,6 @@ function Get-Zip($dest) {
                         $total = [Math]::Round($job.BytesTotal / 1MB, 0)
                         Write-Progress -Activity "下载素材包（约 1 GB）" -Status ("{0} MB / {1} MB    {2} KB/s" -f $mb, $total, [Math]::Round($speed)) -PercentComplete $pct
                     } else {
-                        # 分块传输没有 Content-Length，只能显示已下载量与速度
                         Write-Progress -Activity "下载素材包（约 1 GB，总大小未知）" -Status ("已下载 {0} MB    {1} KB/s    用时 {2:mm\:ss}" -f $mb, [Math]::Round($speed), ($now - $t0))
                     }
                     Start-Sleep -Milliseconds 800
@@ -101,27 +135,19 @@ function Install-FromZip($zip) {
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-function Get-Files {
-    $manifest = Get-Content (Join-Path $PSScriptRoot 'assets-manifest.json') -Raw | ConvertFrom-Json
-    $todo = @()
-    foreach ($f in $manifest.files) {
-        $dest = Join-Path $root $f.p
-        if ((Test-Path $dest) -and ((Get-Item $dest).Length -eq $f.s)) { continue }
-        $todo += $f
-    }
-    Write-Host "  待下载 $($todo.Count) 个文件（共 $([Math]::Round(($todo | Measure-Object s -Sum).Sum / 1MB)) MB）"
-    if ($todo.Count -eq 0) { return }
-
-    $totalMB = [Math]::Round(($todo | Measure-Object s -Sum).Sum / 1MB)
+# 只补缺失文件，已就绪的一个都不碰
+function Get-MissingFiles($missing) {
+    $totalMB = [Math]::Round((($missing | Measure-Object s -Sum).Sum) / 1MB)
+    Write-Host ("  需要下载 {0} 个文件，约 {1} MB" -f $missing.Count, $totalMB)
     $i = 0
     $doneMB = 0
-    foreach ($f in $todo) {
+    foreach ($f in $missing) {
         $i++
         $dest = Join-Path $root $f.p
         New-Item -ItemType Directory -Path (Split-Path -Parent $dest) -Force | Out-Null
         $url = "https://ghfast.top/https://raw.githubusercontent.com/$($manifest.repo)/$($manifest.branch)/$($f.p)"
         $url2 = "https://raw.githubusercontent.com/$($manifest.repo)/$($manifest.branch)/$($f.p)"
-        Write-Progress -Activity "下载素材（逐文件，可中断续传）" -Status ("已下载 {0} / {1} MB    第 {2} / {3} 个    {4}" -f [Math]::Round($doneMB), $totalMB, $i, $todo.Count, (Split-Path -Leaf $f.p)) -PercentComplete ([Math]::Round($i / $todo.Count * 100))
+        Write-Progress -Activity "下载素材（只补缺失，可中断续传）" -Status ("已下载 {0} / {1} MB    第 {2} / {3} 个    {4}" -f [Math]::Round($doneMB), $totalMB, $i, $missing.Count, (Split-Path -Leaf $f.p)) -PercentComplete ([Math]::Round($i / [Math]::Max(1, $missing.Count) * 100))
         $done = $false
         foreach ($u in @($url, $url2)) {
             try {
@@ -144,44 +170,55 @@ function Start-Installer {
     }
 }
 
+# ---------- 主流程 ----------
 Write-Host "NekoWebShow 素材获取" -ForegroundColor Cyan
 Write-Host "素材版权归 NEKO WORKs，仅下载到你本机自用，请勿再分发。" -ForegroundColor DarkGray
 
 Write-Step "检查现有素材"
-$have = Test-Assets
-if ($have) {
-    Write-Host "`n素材已齐全，跳过下载。" -ForegroundColor Green
+$state = Get-AssetState
+Show-State $state
+
+if ($state.Missing.Count -eq 0) {
+    Write-Host "`n素材已齐全，不需要下载。" -ForegroundColor Green
     if (-not $SkipInstall) { Start-Installer }
     return
 }
 
-$downloaded = $false
-if ($Mode -in 'auto', 'zip') {
+# 已经有相当一部分就直接增量补，不为几个文件重下 1 GB
+$ratio = $state.Present / [Math]::Max(1, $state.Total)
+$useZip = ($Mode -eq 'zip') -or ($Mode -eq 'auto' -and $ratio -lt 0.3)
+
+if ($useZip) {
     Write-Step "下载上游素材包（约 1 GB）"
     $zip = Join-Path $env:TEMP 'nekoshow-assets.zip'
     if ((Test-Path $zip) -and ((Get-Item $zip).Length -gt 100MB)) {
-        Write-Host "  发现上次下载的压缩包，直接使用" -ForegroundColor DarkGray
-        $downloaded = $true
+        Write-Host "  发现上次下载的完整压缩包，直接使用" -ForegroundColor DarkGray
+        $ok = $true
     } else {
-        $downloaded = Get-Zip $zip
+        $ok = Get-Zip $zip
     }
-    if ($downloaded) {
+    if ($ok) {
         Write-Step "解压并放置素材"
-        try { Install-FromZip $zip } catch { Write-Host "  解压失败: $($_.Exception.Message)" -ForegroundColor Red; $downloaded = $false }
+        try { Install-FromZip $zip } catch { Write-Host "  解压失败: $($_.Exception.Message)" -ForegroundColor Red; $ok = $false }
+    }
+    if ($ok) {
+        $state = Get-AssetState
+        Show-State $state
     }
 }
 
-if (-not $downloaded -and $Mode -in 'auto', 'files') {
-    Write-Step "改用逐文件下载（较慢，可中断后重跑续传）"
-    try { Get-Files } catch { Write-Host "  下载出错: $($_.Exception.Message)" -ForegroundColor Red }
+if ($state.Missing.Count -gt 0) {
+    Write-Step "增量补齐缺失文件"
+    try { Get-MissingFiles $state.Missing } catch { Write-Host "  下载出错: $($_.Exception.Message)" -ForegroundColor Red }
 }
 
 Write-Step "校验"
-$ok = Test-Assets
-if ($ok) {
+$final = Get-AssetState
+Show-State $final
+if ($final.Missing.Count -eq 0) {
     Write-Host "`n素材齐全。" -ForegroundColor Green
     if (-not $SkipInstall) { Start-Installer }
 } else {
-    Write-Host "`n素材不完整。" -ForegroundColor Yellow
-    Write-Host "可以：重新运行本脚本（已下载的会跳过）；或用浏览器手动下载（见 README「手动安装」）。"
+    Write-Host "`n仍有 $($final.Missing.Count) 个文件缺失。" -ForegroundColor Yellow
+    Write-Host "重新运行本脚本会自动跳过已完整的，只补剩下的。"
 }
