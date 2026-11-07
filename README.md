@@ -16,6 +16,8 @@
 > 上游播放器由 **GTX690战术核显卡导弹** 开发：<https://www.nekopara.uk> ・ <https://show.nekopara.uk>
 >
 > **本项目（修改版）源码：<https://github.com/felix-ji725/NekoWebShow-WallpaperEngine>**
+>
+> 使用问题请在本仓库提 [Issue](https://github.com/felix-ji725/NekoWebShow-WallpaperEngine/issues)，不要打扰原作者——他不负责 Windows 端。
 
 ## 效果
 
@@ -46,7 +48,11 @@
 3. 校验数量（195 / 121 / 271）
 4. 调起安装脚本
 
-下载失败会自动降级为**逐文件下载**（588 个文件，可中断续传，重跑跳过已完成）。
+下载失败会自动降级为**逐文件下载**（588 个文件，可中断续传）。
+
+**已有一部分素材时**：脚本按文件清单逐个核对，只补缺失或大小不符的文件，不会重新下载整包；清单之外的额外文件会被忽略。
+
+**下载速度**：默认 4 路并发走 jsDelivr 镜像（比单连接下整包快得多），失败自动切换到 ghfast / 官方源。网速好的话可以 `-Workers 8` 再快一点。
 
 ### 方式 B：手动下载
 
